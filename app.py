@@ -811,20 +811,12 @@ def main():
 
             st.subheader('Regulative Statements Table')
             if not df_reg.empty:
-                reg_rows = df_reg.astype(str).apply(lambda row: ','.join(row.values), axis=1)
-                reg_content = '\n'.join(reg_rows)
-                if st.button('Copy Regulative Table'):
-                    show_copyable_text('Copy the content below:', reg_content, 'reg_copy')
                 st.dataframe(df_reg, use_container_width=True, hide_index=True)
             else:
                 st.info('No regulative statements found.')
 
             st.subheader('Constitutive Statements Table')
             if not df_con.empty:
-                con_rows = df_con.astype(str).apply(lambda row: ','.join(row.values), axis=1)
-                con_content = '\n'.join(con_rows)
-                if st.button('Copy Constitutive Table'):
-                    show_copyable_text('Copy the content below:', con_content, 'con_copy')
                 st.dataframe(df_con, use_container_width=True, hide_index=True)
             else:
                 st.info('No constitutive statements found.')
@@ -989,21 +981,6 @@ def show_footer():
         <p>📚 Based on Institutional Grammar 2.0 framework</p>
     </div>
     """, unsafe_allow_html=True)
-
-def show_copyable_text(label, text, key):
-    st.text_area(label, text, height=200, key=key)
-    st.markdown(
-        f"""
-        <script>
-        const textarea = document.querySelector('textarea[data-testid="stTextArea"]');
-        if (textarea) {{
-            textarea.focus();
-            textarea.select();
-        }}
-        </script>
-        """,
-        unsafe_allow_html=True,
-    )
 
 # Run the application
 if __name__ == "__main__":
