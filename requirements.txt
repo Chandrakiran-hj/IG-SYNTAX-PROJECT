@@ -6,5 +6,5 @@ spacy
 openai
 PyPDF2
 python-docx
-xlsxwriter
+openpyxl
 textstat 

@@ -21,7 +21,8 @@ from openai import OpenAI
 import PyPDF2
 import docx
 from docx import Document
-import xlsxwriter
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
 from io import BytesIO
 
 # Advanced NLP libraries
@@ -485,36 +486,45 @@ def extract_text_from_txt(file) -> str:
         return ""
 
 def create_excel_download(df: pd.DataFrame) -> bytes:
-    """Create Excel file for download"""
+    """Create Excel file for download using openpyxl"""
     buffer = BytesIO()
-    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-        df.to_excel(writer, sheet_name='IG_Coding_Results', index=False)
-        
-        # Get the xlsxwriter workbook and worksheet objects
-        workbook = writer.book
-        worksheet = writer.sheets['IG_Coding_Results']
-        
-        # Add formatting
-        header_format = workbook.add_format({
-            'bold': True,
-            'text_wrap': True,
-            'valign': 'top',
-            'fg_color': '#D7E4BC',
-            'border': 1
-        })
-        
-        # Write the column headers with formatting
-        for col_num, value in enumerate(df.columns.values):
-            worksheet.write(0, col_num, value, header_format)
-        
-        # Auto-adjust column widths
-        for i, col in enumerate(df.columns):
-            max_length = max(
-                df[col].astype(str).str.len().max(),
-                len(str(col))
-            )
-            worksheet.set_column(i, i, min(max_length + 2, 50))
     
+    # Create workbook and worksheet
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'IG_Coding_Results'
+    
+    # Write headers with formatting
+    header_font = Font(bold=True)
+    header_fill = PatternFill(start_color='D7E4BC', end_color='D7E4BC', fill_type='solid')
+    header_alignment = Alignment(horizontal='center', vertical='top', wrap_text=True)
+    
+    for col_num, value in enumerate(df.columns.values, 1):
+        cell = ws.cell(row=1, column=col_num, value=value)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+    
+    # Write data
+    for row_num, row in enumerate(df.values, 2):
+        for col_num, value in enumerate(row, 1):
+            ws.cell(row=row_num, column=col_num, value=value)
+    
+    # Auto-adjust column widths
+    for column in ws.columns:
+        max_length = 0
+        column_letter = column[0].column_letter
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = min(max_length + 2, 50)
+        ws.column_dimensions[column_letter].width = adjusted_width
+    
+    # Save to buffer
+    wb.save(buffer)
     buffer.seek(0)
     return buffer.getvalue()
 
