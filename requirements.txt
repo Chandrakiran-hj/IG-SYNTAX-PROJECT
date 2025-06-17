@@ -1,0 +1,10 @@
+streamlit
+pandas
+numpy
+nltk
+spacy
+openai
+PyPDF2
+python-docx
+xlsxwriter
+textstat 
